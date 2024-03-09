@@ -1,0 +1,82 @@
+---
+title: "Exercice_4"
+author: "Khadidiatou DIAKHATE"
+date: "2024-03-08"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Description de la base
+
+Cette base contient des informations sur les élèves ayant fait le baccalauréat dans le département de Goudiri
+
+## Quelques statistiques
+
+```{r base_de_donnees, echo=FALSE}
+# Création de la base de données
+base_de_donnees <- data.frame(
+  prenoms_et_noms = rep(c("MBB", "KC", "KD", "AD", "HEB", "AASK"), 50),
+  sexe = factor(rep(c(1, 2, 2, 2, 2, 1), 50), levels = c(1, 2), labels = c("Homme", "Femme")), # Ajout des labels
+  age = sample(18:21, 300, replace = TRUE),
+  taille_en_cm = sample(160:195, 300, replace = TRUE),
+  Moyenne_au_bac = sample(0:20, 300, replace = TRUE) # Génération aléatoire des moyennes au bac
+)
+
+# Ajout de la colonne Mention en fonction de la moyenne et de la colonne rang
+base_de_donnees$Mention <- ifelse(base_de_donnees$Moyenne_au_bac >= 16, "Très Bien",
+                                  ifelse(base_de_donnees$Moyenne_au_bac >= 14, "Bien",
+                                         ifelse(base_de_donnees$Moyenne_au_bac >= 12,"Assez Bien",
+                                                ifelse(base_de_donnees$Moyenne_au_bac >= 10, "Passable",
+                                                       ifelse(base_de_donnees$sexe =="Homme", "Ajourné", "Ajournée")))))
+
+library(dplyr) #pour utiliser la fonction min_rank() pour donner à R la manière dont il doit organiser l'attribution de rang
+base_de_donnees$rang <- min_rank(-base_de_donnees$Moyenne_au_bac)
+
+base_de_donnees$admis <- ifelse(base_de_donnees$Moyenne_au_bac >= 10, "Oui", "Non")
+base_de_donnees$poids_en_kg <- sample(0:100, 300, replace = TRUE)
+base_de_donnees$regime_scolaire <- sample(c("Interne", "Externe", "Demi-pensionnaire"), 300, replace = TRUE)
+base_de_donnees$type_etablissement <- sample(c("Public", "Privé"), 300, replace = TRUE)
+base_de_donnees$serie <- sample(c("S1", "S2", "S3", "L"), 300, replace = TRUE)
+
+
+
+
+# Affichage du dataframe
+summary(base_de_donnees)
+View(base_de_donnees)
+
+
+```
+
+
+
+
+## Quelques graphiques...
+
+
+```{r, echo =False}
+library(ggplot2)
+
+ggplot(base_de_donnees, aes(x = sexe)) +
+  geom_bar(fill = "skyblue", color = "pink") +
+  labs(title = "Répartition des sexes")
+
+# Votre code pour générer le graphique ici
+
+
+ggplot(base_de_donnees, aes(x = age, y = Moyenne_au_bac)) +
+  geom_point(color = "purple") +
+  labs(title = "Relation entre l'âge et la moyenne au bac",
+       x = "Âge",
+       y = "Moyenne au bac")
+
+ggplot(base_de_donnees, aes(x = "", fill = M)) +
+  geom_bar(width = 1) +
+  coord_polar("y") +
+  labs(title = "Répartition des mentions")
+
+ggplot(base_de_donnees, aes(x = type_etablissement, fill = Mention)) +
+  geom_bar(position = "stack", color = "green") +
+  labs(title = "Répartition des mentions par type d'établissement")
